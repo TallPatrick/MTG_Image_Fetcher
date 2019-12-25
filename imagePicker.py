@@ -18,21 +18,11 @@ def main():
         if Card_Query.lower() == 'flip' or Card_Query.lower() == 'transform':
             if transformable:
                 if showing_front:
-                    Card_uri = back['image_uris']['png']
-                    file = urlopen(Card_uri)
-                    local = open('card.png', 'wb')
-                    local.write(file.read())
-                    local.close()
+                    downloadCard(back)
                     showing_front = False
-                    print("Flipped!")
                 else:
-                    Card_uri = front['image_uris']['png']
-                    file = urlopen(Card_uri)
-                    local = open('card.png', 'wb')
-                    local.write(file.read())
-                    local.close()
+                    downloadCard(front)
                     showing_front = True
-                    print("Flipped!")
             else:
                 print("Transform card not loaded")
             continue
@@ -111,6 +101,14 @@ def main():
             print("Type 'Flip' or 'Transform' to see the back side")
 
 # Reused functions
+
+
+def downloadCard(cardSide):
+    Card_uri = cardSide['image_uris']['png']
+    file = urlopen(Card_uri)
+    with open('card.png', 'wb') as cardFile:
+        cardFile.write(file.read())
+    print("Flipped!")
 
 
 def GetName(AutoOrCard):
