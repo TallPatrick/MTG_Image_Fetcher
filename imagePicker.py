@@ -1,7 +1,6 @@
 #!/usr/bin/env python3.7
 
 import scrython
-import sys
 import shutil
 import time
 from urllib.request import urlopen
@@ -139,8 +138,7 @@ def RobustSearch(CardQuery):
             try:
                 card = scrython.cards.Autocomplete(
                     q=CardQuery.lower(), query=CardQuery.lower())
-            except:
-                e = sys.exc_info()
+            except Exception as e:
                 print(
                     "Something went wrong.  Clearing the image and returning to prompt.\nError details:")
                 print(e)
@@ -155,8 +153,7 @@ def RobustSearch(CardQuery):
                     CardQuery = card.name()
                     card = scrython.cards.Autocomplete(
                         q=CardQuery.lower(), query=CardQuery.lower())
-                except:
-                    e = sys.exc_info()
+                except Exception as e:
                     print("still nothing, or some other error")
                     return False
             else:
