@@ -5,6 +5,8 @@ import sys
 import shutil
 import time
 from urllib.request import urlopen
+from scrython.cards.named import Named
+from scrython.cards.autocomplete import Autocomplete
 
 
 def main():
@@ -113,9 +115,9 @@ def main():
 
 
 def GetName(AutoOrCard):
-    if str(type(AutoOrCard)) == "<class 'scrython.cards.named.Named'>":
+    if isinstance(AutoOrCard, Named):
         return AutoOrCard.name()
-    if str(type(AutoOrCard)) == "<class 'scrython.cards.autocomplete.Autocomplete'>":
+    if isinstance(AutoOrCard, Autocomplete):
         return AutoOrCard.data()[0]
     print("ERROR!!!  Not sure how to handle this type!!!")
     return None
