@@ -1,7 +1,7 @@
 #!/usr/bin/env python3.7
 
 import scrython
-import shutil
+from os import remove
 import time
 from urllib.request import urlopen
 from scrython.cards import Named
@@ -29,12 +29,12 @@ def main():
         if Card_Query.lower() == 'clear' or Card_Query.lower() == '':
             # clear the image and loop
             print('Resetting image...')
-            shutil.copy2('blank.png', 'card.png')
+            remove('card.png')
             continue
         if Card_Query.lower() == 'exit please':
             # Exit the program
             print('Bye bye!  Thanks for being polite!')
-            shutil.copy2('blank.png', 'card.png')
+            remove('card.png')
             exit()
         # Exact Search checking
         if Card_Query[len(Card_Query) - 1] == '.':
@@ -139,7 +139,7 @@ def RobustSearch(CardQuery):
                     "Something went wrong.  Clearing the image and returning to prompt.\nError details:")
                 print(e)
                 print("\n\n")
-                shutil.copy2('blank.png', 'card.png')
+                remove('card.png')
                 return False
         else:
             if len(auto.data()) == 0:
