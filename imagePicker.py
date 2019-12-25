@@ -60,19 +60,7 @@ def main():
         # the meat and potatoes of copying down the image to the right spot
         ###################################################################
         # Find printings of the card
-        Card_Name = GetName(card)
-        printings = Search(q="++{}".format(Card_Name))
-        i = 1
-        if len(printings.data()) != 1:
-            print("Card: " + Card_Name)
-            for card in printings.data():
-                print(i, ":", card['set'].upper(), ":", card['set_name'])
-                i = i + 1
-            # Select a printing
-            set_select = selectPrintingPrompt(i)
-        else:
-            set_select = 1
-        card = printings.data(int(set_select) - 1)
+        card = findPrintingsOfCard(card)
         showing_front = True
         # check for Transform
         if card['layout'] == 'transform':
@@ -92,6 +80,22 @@ def main():
             print("Type 'Flip' or 'Transform' to see the back side")
 
 # Reused functions
+
+
+def findPrintingsOfCard(card):
+    Card_Name = GetName(card)
+    printings = Search(q="++{}".format(Card_Name))
+    i = 1
+    if len(printings.data()) != 1:
+        print("Card: " + Card_Name)
+        for card in printings.data():
+            print(i, ":", card['set'].upper(), ":", card['set_name'])
+            i = i + 1
+        # Select a printing
+        set_select = selectPrintingPrompt(i)
+    else:
+        set_select = 1
+    return printings.data(int(set_select) - 1)
 
 
 def selectPrintingPrompt(total_options):
