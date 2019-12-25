@@ -78,7 +78,7 @@ def main():
                 i = i + 1
             # Select a printing
             set_select = input("Select a printing: ")
-            if not IsInt(set_select):
+            if isinstance(set_select, int):
                 print('Please try again, and type a number next time.\n')
                 continue
             if int(set_select) > i or int(set_select) < 1:
@@ -119,14 +119,6 @@ def GetName(AutoOrCard):
         return AutoOrCard.data()[0]
     print("ERROR!!!  Not sure how to handle this type!!!")
     return None
-
-
-def IsInt(s):
-    try:
-        int(s)
-        return True
-    except ValueError:
-        return False
 
 
 def RobustSearch(CardQuery):
