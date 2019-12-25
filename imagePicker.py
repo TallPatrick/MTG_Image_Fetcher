@@ -4,8 +4,8 @@ import scrython
 import shutil
 import time
 from urllib.request import urlopen
-from scrython.cards.named import Named
-from scrython.cards.autocomplete import Autocomplete
+from scrython.cards import Named
+from scrython.cards import Autocomplete
 
 
 def main():
@@ -52,7 +52,7 @@ def main():
             Card_Query = Card_Query[:-1]
             try:
                 time.sleep(0.05)
-                card = scrython.cards.Named(exact=Card_Query.lower())
+                card = Named(exact=Card_Query.lower())
 
             except Exception:
                 print("No Exact match.  Trying partial match")
@@ -126,18 +126,16 @@ def RobustSearch(CardQuery):
     auto = ""
     try:
         time.sleep(0.05)
-        card = scrython.cards.Named(exact=CardQuery.lower())
-        auto = scrython.cards.Autocomplete(
-            q=CardQuery.lower(), query=CardQuery.lower())
+        card = Named(exact=CardQuery.lower())
+        auto = Autocomplete(q=CardQuery.lower(), query=CardQuery.lower())
     except Exception:
         time.sleep(0.05)
-        auto = scrython.cards.Autocomplete(
-            q=CardQuery.lower(), query=CardQuery.lower())
+        auto = Autocomplete(q=CardQuery.lower(), query=CardQuery.lower())
     if auto:
         if len(auto.data()) == 1:
             try:
-                card = scrython.cards.Autocomplete(
-                    q=CardQuery.lower(), query=CardQuery.lower())
+                card = Autocomplete(q=CardQuery.lower(),
+                                    query=CardQuery.lower())
             except Exception as e:
                 print(
                     "Something went wrong.  Clearing the image and returning to prompt.\nError details:")
@@ -149,10 +147,10 @@ def RobustSearch(CardQuery):
             if len(auto.data()) == 0:
                 print("No Cards found.  Trying fuzzy search...")
                 try:
-                    card = scrython.cards.Named(fuzzy=CardQuery)
+                    card = Named(fuzzy=CardQuery)
                     CardQuery = card.name()
-                    card = scrython.cards.Autocomplete(
-                        q=CardQuery.lower(), query=CardQuery.lower())
+                    card = Autocomplete(q=CardQuery.lower(),
+                                        query=CardQuery.lower())
                 except Exception as e:
                     print("still nothing, or some other error")
                     return False
