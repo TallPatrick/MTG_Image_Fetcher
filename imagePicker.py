@@ -6,6 +6,7 @@ import time
 from urllib.request import urlopen
 from scrython.cards import Named
 from scrython.cards import Autocomplete
+from scrython.cards import Search
 
 
 def main():
@@ -19,9 +20,11 @@ def main():
             if transformable:
                 if showing_front:
                     downloadCard(back)
+                    print("Flipped!")
                     showing_front = False
                 else:
                     downloadCard(front)
+                    print("Flipped!")
                     showing_front = True
             else:
                 print("Transform card not loaded")
@@ -48,19 +51,17 @@ def main():
                 print("No Exact match.  Trying partial match")
                 card = RobustSearch(Card_Query)
                 if not card:
-                    card = None
                     continue
         else:
             # Regular Searching
             card = RobustSearch(Card_Query)
             if not card:
-                card = None
                 continue
         # the meat and potatoes of copying down the image to the right spot
         ###################################################################
         # Find printings of the card
         Card_Name = GetName(card)
-        printings = scrython.cards.Search(q="++{}".format(Card_Name))
+        printings = Search(q="++{}".format(Card_Name))
         i = 1
         if len(printings.data()) != 1:
             print("Card: " + Card_Name)
@@ -89,11 +90,7 @@ def main():
             front = card
             back = card
         # Pull down the image!
-        Card_uri = front['image_uris']['png']
-        file = urlopen(Card_uri)
-        local = open('card.png', 'wb')
-        local.write(file.read())
-        local.close()
+        downloadCard(front)
         # Communicate success!
         print('Downloaded ' + card["name"] +
               '.  Type "Clear" or a new card to clear the image')
@@ -108,7 +105,6 @@ def downloadCard(cardSide):
     file = urlopen(Card_uri)
     with open('card.png', 'wb') as cardFile:
         cardFile.write(file.read())
-    print("Flipped!")
 
 
 def GetName(AutoOrCard):
@@ -129,7 +125,7 @@ def getCardWithAutocomplete(CardQuery):
         print(f"error details: {e}")
         print("\n\n")
         remove('card.png')
-        return False
+        return None
 
 
 def getCardWithFuzzySearch(CardQuery):
@@ -148,7 +144,7 @@ def RobustSearch(CardQuery):
 
     if not auto:
         print("couldn't get the card name")
-        return False
+        return None
 
     if len(auto.data()) == 1:
         return getCardWithAutocomplete(CardQuery)
@@ -160,7 +156,7 @@ def RobustSearch(CardQuery):
     print("Did you mean?  Please search again!")
     for item in auto.data():
         print(item)
-    return False
+    return None
 
 
 if __name__ == '__main__':
