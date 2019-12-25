@@ -69,13 +69,7 @@ def main():
                 print(i, ":", card['set'].upper(), ":", card['set_name'])
                 i = i + 1
             # Select a printing
-            set_select = input("Select a printing: ")
-            if isinstance(set_select, int):
-                print('Please try again, and type a number next time.\n')
-                continue
-            if int(set_select) > i or int(set_select) < 1:
-                print('Please pick a printing from the list!\n')
-                continue
+            set_select = selectPrintingPrompt(i)
         else:
             set_select = 1
         card = printings.data(int(set_select) - 1)
@@ -98,6 +92,18 @@ def main():
             print("Type 'Flip' or 'Transform' to see the back side")
 
 # Reused functions
+
+
+def selectPrintingPrompt(total_options):
+    while True:
+        set_select = input("Select a printing: ")
+        if isinstance(set_select, int):
+            print('Please try again, and type a number next time.\n')
+            continue
+        if int(set_select) > total_options or int(set_select) < 1:
+            print('Please pick a printing from the list!\n')
+            continue
+        return set_select
 
 
 def downloadCard(cardSide):
