@@ -54,7 +54,7 @@ def main():
                     continue
         else:
             # Regular Searching
-            card = (Card_Query)
+            card = RobustSearch(Card_Query)
             if not card:
                 continue
         # the meat and potatoes of copying down the image to the right spot
