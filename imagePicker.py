@@ -54,7 +54,7 @@ def main():
                     continue
         else:
             # Regular Searching
-            card = RobustSearch(Card_Query)
+            card = (Card_Query)
             if not card:
                 continue
         # the meat and potatoes of copying down the image to the right spot
@@ -134,7 +134,7 @@ def getCardWithAutocomplete(CardQuery):
         print("Something went wrong. Returning to prompt.")
         print(f"error details: {e}")
         print("\n\n")
-        remove('card.png')
+        shutil.copy2('blank.png', 'card.png')
         return None
 
 
