@@ -1,88 +1,68 @@
 #!/usr/bin/env python3.7
 
-import scrython, sys, os, shutil, time
-from  urllib.request import urlopen
+import scrython
+import shutil
+import time
+from urllib.request import urlopen
+from scrython.cards import Named
+from scrython.cards import Autocomplete
+from scrython.cards import Search
+
+
 def main():
-    #support for transforming cards
+    # support for transforming cards
     transformable = False
-    #start the loop of looking for card names to search
+    # start the loop of looking for card names to search
     while True:
-        Card_Query = str(input('Enter name of card to fetch or <ENTER> to reset image: '))
+        Card_Query = str(
+            input('Enter name of card to fetch or <ENTER> to reset image: '))
         if Card_Query.lower() == 'flip' or Card_Query.lower() == 'transform':
             if transformable:
                 if showing_front:
-                    Card_uri = back['image_uris']['png']
-                    file = urlopen(Card_uri)
-                    local = open('card.png', 'wb')
-                    local.write(file.read())
-                    local.close()
+                    downloadCard(back)
+                    print("Flipped!")
                     showing_front = False
-                    print("Flipped!")
                 else:
-                    Card_uri = front['image_uris']['png']
-                    file = urlopen(Card_uri)
-                    local = open('card.png', 'wb')
-                    local.write(file.read())
-                    local.close()
-                    showing_front = True
+                    downloadCard(front)
                     print("Flipped!")
+                    showing_front = True
             else:
                 print("Transform card not loaded")
             continue
         if Card_Query.lower() == 'clear' or Card_Query.lower() == '':
-            ##clear the image and loop
+            # clear the image and loop
             print('Resetting image...')
             shutil.copy2('blank.png', 'card.png')
             continue
         if Card_Query.lower() == 'exit please':
-            ##Exit the program
+            # Exit the program
             print('Bye bye!  Thanks for being polite!')
             shutil.copy2('blank.png', 'card.png')
             exit()
-        #Exact Search checking
-        if Card_Query[len(Card_Query)-1] == '.':
+        # Exact Search checking
+        if Card_Query[len(Card_Query) - 1] == '.':
             print("Force search for exact")
-            Card_Query=Card_Query[:-1]
+            Card_Query = Card_Query[:-1]
             try:
                 time.sleep(0.05)
-                card = scrython.cards.Named(exact=Card_Query.lower())
-                
+                card = Named(exact=Card_Query.lower())
+
             except Exception:
                 print("No Exact match.  Trying partial match")
                 card = RobustSearch(Card_Query)
-                if card == False:
-                    card = None
+                if not card:
                     continue
         else:
-            #Regular Searching
+            # Regular Searching
             card = RobustSearch(Card_Query)
-            if card == False:
-                card = None
+            if not card:
                 continue
-        #the meat and potatoes of copying down the image to the right spot
-        #########################################################################################################
-        #Find printings of the card
-        Card_Name = GetName(card)
-        printings = scrython.cards.Search(q="++{}".format(Card_Name))
-        i = 1
-        if len(printings.data()) != 1:
-            print("Card: " + Card_Name)
-            for card in printings.data():
-                print(i, ":", card['set'].upper(), ":", card['set_name'])
-                i = i + 1
-            #Select a printing
-            set_select = input("Select a printing: ")
-            if IsInt(set_select) != True:
-                print('Please try again, and type a number next time.\n')
-                continue
-            if int(set_select) > i or int(set_select) < 1:
-                print('Please pick a printing from the list!\n')
-                continue
-        else:
-            set_select = 1
-        card = printings.data(int(set_select)-1)
+        # the meat and potatoes of copying down the image to the right spot
+        ###################################################################
+        # Find printings of the card
+        card = findPrintingsOfCard(card)
         showing_front = True
-        #check for Transform
+        # check for Transform
         if card['layout'] == 'transform':
             transformable = True
             front = card['card_faces'][0]
@@ -91,49 +71,95 @@ def main():
             transformable = False
             front = card
             back = card
-        #Pull down the image!
-        Card_uri = front['image_uris']['png']
-        file = urlopen(Card_uri)
-        local = open('card.png', 'wb')
-        local.write(file.read())
-        local.close()
-        #Communicate success!
-        print('Downloaded ' + card["name"] + '.  Type "Clear" or a new card to clear the image')
+        # Pull down the image!
+        downloadCard(front)
+        # Communicate success!
+        print('Downloaded ' + card["name"] +
+              '.  Type "Clear" or a new card to clear the image')
         if transformable:
             print("Type 'Flip' or 'Transform' to see the back side")
 
-#Reused functions
+# Reused functions
+
+
+def findPrintingsOfCard(card):
+    Card_Name = GetName(card)
+    printings = Search(q="++{}".format(Card_Name))
+    i = 1
+    if len(printings.data()) != 1:
+        print("Card: " + Card_Name)
+        for card in printings.data():
+            print(i, ":", card['set'].upper(), ":", card['set_name'])
+            i = i + 1
+        # Select a printing
+        set_select = selectPrintingPrompt(i)
+    else:
+        set_select = 1
+    return printings.data(int(set_select) - 1)
+
+
+def selectPrintingPrompt(total_options):
+    while True:
+        set_select = input("Select a printing: ")
+        if isinstance(set_select, int):
+            print('Please try again, and type a number next time.\n')
+            continue
+        if int(set_select) > total_options or int(set_select) < 1:
+            print('Please pick a printing from the list!\n')
+            continue
+        return set_select
+
+
+def downloadCard(cardSide):
+    Card_uri = cardSide['image_uris']['png']
+    file = urlopen(Card_uri)
+    with open('card.png', 'wb') as cardFile:
+        cardFile.write(file.read())
+
+
 def GetName(AutoOrCard):
-    if str(type(AutoOrCard)) == "<class 'scrython.cards.named.Named'>":
+    if isinstance(AutoOrCard, Named):
         return AutoOrCard.name()
-    if str(type(AutoOrCard)) == "<class 'scrython.cards.autocomplete.Autocomplete'>":
+    if isinstance(AutoOrCard, Autocomplete):
         return AutoOrCard.data()[0]
     print("ERROR!!!  Not sure how to handle this type!!!")
     return None
 
-def IsInt(s):
-    try: 
-        int(s)
-        return True
-    except ValueError:
-        return False
+
+def getCardWithAutocomplete(CardQuery):
+    try:
+        return Autocomplete(q=CardQuery.lower(),
+                            query=CardQuery.lower())
+    except Exception as e:
+        print("Something went wrong. Returning to prompt.")
+        print(f"error details: {e}")
+        print("\n\n")
+        shutil.copy2('blank.png', 'card.png')
+        return None
+
+
+def getCardWithFuzzySearch(CardQuery):
+    CardQuery = Named(fuzzy=CardQuery).name()
+    return getCardWithAutocomplete(CardQuery)
+
 
 def RobustSearch(CardQuery):
     auto = ""
     try:
         time.sleep(0.05)
-        card = scrython.cards.Named(exact=CardQuery.lower())
-        auto = scrython.cards.Autocomplete(q=CardQuery.lower(), query=CardQuery.lower())
+        card = Named(exact=CardQuery.lower())
+        auto = Autocomplete(q=CardQuery.lower(), query=CardQuery.lower())
     except Exception:
         time.sleep(0.05)
-        auto = scrython.cards.Autocomplete(q=CardQuery.lower(), query=CardQuery.lower())
+        auto = Autocomplete(q=CardQuery.lower(), query=CardQuery.lower())
     if auto:
         if len(auto.data()) == 1:
             try:
-                card = scrython.cards.Autocomplete(q=CardQuery.lower(), query=CardQuery.lower())
-            except:
-                e = sys.exc_info()
-                print("Something went wrong.  Clearing the image and returning to prompt.\nError details:")
+                card = Autocomplete(q=CardQuery.lower(),
+                                    query=CardQuery.lower())
+            except Exception as e:
+                print(
+                    "Something went wrong.  Clearing the image and returning to prompt.\nError details:")
                 print(e)
                 print("\n\n")
                 shutil.copy2('blank.png', 'card.png')
@@ -142,19 +168,20 @@ def RobustSearch(CardQuery):
             if len(auto.data()) == 0:
                 print("No Cards found.  Trying fuzzy search...")
                 try:
-                    card = scrython.cards.Named(fuzzy=CardQuery)
+                    card = Named(fuzzy=CardQuery)
                     CardQuery = card.name()
-                    card = scrython.cards.Autocomplete(q=CardQuery.lower(), query=CardQuery.lower())
-                except:
-                    e = sys.exc_info()
+                    card = Autocomplete(q=CardQuery.lower(),
+                                        query=CardQuery.lower())
+                except Exception as e:
                     print("still nothing, or some other error")
-                    return False           
+                    return False
             else:
                 print("Did you mean?  Please search again!")
                 for item in auto.data():
                     print(item)
                 return False
     return card
+
 
 if __name__ == '__main__':
     main()
