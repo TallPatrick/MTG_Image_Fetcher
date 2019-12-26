@@ -1,6 +1,7 @@
 # MTG_Image_Fetcher
 A Simple Script for pulling down images from Scryfall for display on a stream overlay.
 
+Video walkthrough of features and setup available here: https://youtu.be/o9iv8fjbY88 
 
 ###########################################
 
