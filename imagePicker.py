@@ -145,28 +145,42 @@ def getCardWithFuzzySearch(CardQuery):
 
 def RobustSearch(CardQuery):
     auto = ""
-    retries = 3
-
-    while retries != 0 or not auto:
+    try:
+        time.sleep(0.05)
+        card = Named(exact=CardQuery.lower())
+        auto = Autocomplete(q=CardQuery.lower(), query=CardQuery.lower())
+    except Exception:
         time.sleep(0.05)
         auto = Autocomplete(q=CardQuery.lower(), query=CardQuery.lower())
-        retries -= 1
-
-    if not auto:
-        print("couldn't get the card name")
-        return None
-
-    if len(auto.data()) == 1:
-        return getCardWithAutocomplete(CardQuery)
-
-    if len(auto.data()) == 0:
-        print("No Cards found.  Trying fuzzy search...")
-        return getCardWithFuzzySearch(CardQuery)
-
-    print("Did you mean?  Please search again!")
-    for item in auto.data():
-        print(item)
-    return None
+    if auto:
+        if len(auto.data()) == 1:
+            try:
+                card = Autocomplete(q=CardQuery.lower(),
+                                    query=CardQuery.lower())
+            except Exception as e:
+                print(
+                    "Something went wrong.  Clearing the image and returning to prompt.\nError details:")
+                print(e)
+                print("\n\n")
+                remove('card.png')
+                return False
+        else:
+            if len(auto.data()) == 0:
+                print("No Cards found.  Trying fuzzy search...")
+                try:
+                    card = Named(fuzzy=CardQuery)
+                    CardQuery = card.name()
+                    card = Autocomplete(q=CardQuery.lower(),
+                                        query=CardQuery.lower())
+                except Exception as e:
+                    print("still nothing, or some other error")
+                    return False
+            else:
+                print("Did you mean?  Please search again!")
+                for item in auto.data():
+                    print(item)
+                return False
+    return card
 
 
 if __name__ == '__main__':
