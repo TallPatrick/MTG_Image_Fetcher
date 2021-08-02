@@ -63,7 +63,7 @@ def main():
         card = findPrintingsOfCard(card)
         showing_front = True
         # check for Transform
-        if card['layout'] == 'transform':
+        if card['layout'] == 'transform' or card['layout'] == 'modal_dfc':
             transformable = True
             front = card['card_faces'][0]
             back = card['card_faces'][1]
