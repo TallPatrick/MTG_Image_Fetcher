@@ -84,7 +84,7 @@ def main():
 
 def findPrintingsOfCard(card):
     Card_Name = GetName(card)
-    printings = Search(q="++{}".format(Card_Name))
+    printings = Search(q='++!"{}"'.format(Card_Name))  
     i = 1
     if len(printings.data()) != 1:
         print("Card: " + Card_Name)
@@ -112,6 +112,7 @@ def selectPrintingPrompt(total_options):
 
 def downloadCard(cardSide):
     Card_uri = cardSide['image_uris']['png']
+    time.sleep(0.05)
     file = urlopen(Card_uri)
     with open('card.png', 'wb') as cardFile:
         cardFile.write(file.read())
@@ -139,6 +140,7 @@ def getCardWithAutocomplete(CardQuery):
 
 
 def getCardWithFuzzySearch(CardQuery):
+    time.sleep(0.05)
     CardQuery = Named(fuzzy=CardQuery).name()
     return getCardWithAutocomplete(CardQuery)
 
