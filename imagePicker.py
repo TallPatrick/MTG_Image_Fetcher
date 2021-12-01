@@ -14,6 +14,7 @@ def main():
     transformable = False
     # start the loop of looking for card names to search
     while True:
+        print("Pro-tip: end the card name with a period to search for an exact name.")
         Card_Query = str(
             input('Enter name of card to fetch or <ENTER> to reset image: '))
         if Card_Query.lower() == 'flip' or Card_Query.lower() == 'transform':
@@ -101,12 +102,15 @@ def findPrintingsOfCard(card):
 def selectPrintingPrompt(total_options):
     while True:
         set_select = input("Select a printing: ")
-        if isinstance(set_select, int):
-            print('Please try again, and type a number next time.\n')
-            continue
-        if int(set_select) > total_options or int(set_select) < 1:
-            print('Please pick a printing from the list!\n')
-            continue
+        try:
+            set_select = int(set_select)
+            if int(set_select) > total_options or int(set_select) < 1:
+                print('Please pick a printing from the list!\n')
+                continue
+        except ValueError:
+            print("Number not typed, selecting printing #1")
+            set_select = 1
+            return set_select
         return set_select
 
 
@@ -176,9 +180,10 @@ def RobustSearch(CardQuery):
                                         query=CardQuery.lower())
                 except Exception as e:
                     print("still nothing, or some other error")
+                    print(e)
                     return False
             else:
-                print("Did you mean?  Please search again!")
+                print("Did you mean?  Please search again!  End your search term with a . to force exact search")
                 for item in auto.data():
                     print(item)
                 return False
